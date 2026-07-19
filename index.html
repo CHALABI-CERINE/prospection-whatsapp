@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Prospection WhatsApp — Recherche + Envoi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Prospection WhatsApp</h1>
+  <div class="subtitle">Trouve des établissements, écris ton message, envoie personnalisé sur WhatsApp — tout en un.</div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabSearchBtn">🔍 Rechercher des établissements</button>
+    <button class="tab-btn" id="tabImportBtn">📁 Importer un fichier Excel</button>
+  </div>
+
+  <!-- SEARCH PANEL -->
+  <div class="panel active" id="panelSearch">
+    <div class="card">
+      <h2>Rechercher (données OpenStreetMap, gratuit)</h2>
+      <div class="grid3">
+        <div class="field">
+          <label>Ville</label>
+          <input type="text" id="cityInput" placeholder="ex: Batna">
+          <div class="suggest-box" id="citySuggest"></div>
+        </div>
+        <div class="field">
+          <label>Pays / État (optionnel)</label>
+          <input type="text" id="regionInput" placeholder="ex: Algérie">
+        </div>
+        <div class="field">
+          <label>Catégorie</label>
+          <select id="categorySelect"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Type de recherche</label>
+        <select id="modeSelect">
+          <option value="no_website">Sans site web (prospection)</option>
+          <option value="with_website">Avec site web (améliorations / sécurisation)</option>
+          <option value="both">Les deux</option>
+        </select>
+      </div>
+      <button class="primary-btn" id="searchBtn">Rechercher</button>
+      <div class="statusline" id="searchStatus"></div>
+      <div class="caption">Source : OpenStreetMap (Nominatim + Overpass), API publique et gratuite — pas de scraping de Google Maps. Merci d'éviter de lancer beaucoup de recherches à la suite.</div>
+    </div>
+
+    <div class="card hidden" id="searchResultsCard">
+      <h2 id="searchResultsTitle">Résultats</h2>
+      <div class="preview-table-wrap">
+        <table class="preview-table" id="searchResultsTable"></table>
+      </div>
+      <button class="primary-btn" id="useResultsBtn">Utiliser ces résultats pour le message</button>
+      <button class="secondary-btn" id="downloadXlsxBtn">Télécharger en Excel</button>
+    </div>
+  </div>
+
+  <!-- IMPORT PANEL -->
+  <div class="panel" id="panelImport">
+    <div class="card">
+      <h2>Importer un fichier</h2>
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+        <div class="big">Clique ou dépose ton fichier ici</div>
+        <div class="small">.xlsx, .xls ou .csv</div>
+        <div class="filename" id="filename"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mapping + template, hidden until data is loaded -->
+  <div id="configSection" class="hidden">
+
+    <div class="card">
+      <h2>Colonnes</h2>
+      <div class="grid2">
+        <div class="field">
+          <label>Nom du contact *</label>
+          <select id="colName"></select>
+        </div>
+        <div class="field">
+          <label>Téléphone *</label>
+          <select id="colPhone"></select>
+        </div>
+        <div class="field">
+          <label>Adresse (optionnel)</label>
+          <select id="colAddress"></select>
+        </div>
+        <div class="field">
+          <label>Lien Google Maps (optionnel)</label>
+          <select id="colMaps"></select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field" style="margin-top:4px;">
+          <label>Filtrer par colonne (optionnel — ex: Statut)</label>
+          <select id="colStatus"></select>
+          <div class="status-chips" id="statusChips"></div>
+        </div>
+        <div class="field" style="margin-top:4px;">
+          <label>Indicatif pays (pour WhatsApp)</label>
+          <input type="text" id="countryCode" placeholder="ex: 213" value="213">
+          <div class="caption" style="margin-top:6px;">Les numéros locaux (ex: 0555 12 34 56) seront convertis en 213555123456 pour que le lien WhatsApp fonctionne. Laisse vide si tes numéros sont déjà au format international.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Message</h2>
+      <div class="placeholders" id="placeholders"></div>
+      <textarea id="template" placeholder="Écris ton message ici, utilise les boutons au-dessus pour insérer un nom de colonne"></textarea>
+      <div class="preview" id="preview"><b>Aperçu (1er contact)</b><span id="previewText"></span></div>
+    </div>
+
+    <button class="primary-btn" id="generateBtn">Générer la liste</button>
+    <div class="warn" id="warnMsg">Sélectionne au moins la colonne Nom et Téléphone.</div>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsSection" style="display:none;">
+    <div class="stats">
+      <div class="stat"><b id="statTotal">0</b>Total</div>
+      <div class="stat"><b id="statDone">0</b>Envoyés</div>
+      <div class="stat"><b id="statLeft">0</b>Restants</div>
+    </div>
+    <div class="warn" id="skippedMsg" style="display:block;"></div>
+    <input class="search" id="listSearch" placeholder="Rechercher un nom ou une adresse...">
+    <div class="list" id="list"></div>
+    <div class="empty" id="empty" style="display:none;">Aucun résultat.</div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
